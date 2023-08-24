@@ -2,10 +2,10 @@ package org.example;
 
 import java.net.*;
 import java.io.*;
-import java.util.Arrays;
 
 public class Main {
-public static void main(String[] args) throws IOException {
+
+    public static void main(String[] args) throws IOException, MalformedURLException {
         ServerSocket serverSocket = null;
         try {
             serverSocket = new ServerSocket(35000);
@@ -38,16 +38,15 @@ public static void main(String[] args) throws IOException {
                 if(firstLine) {
                     firstLine = false;
                     path = inputLine.split(" ")[1];
-                    System.out.println("Hola");
-                    System.out.println(Arrays.toString(path.split(" ")));
                 }
                 if (!in.ready()) {
                     break;
                 }
             }
 
-            if(path.startsWith("/hello?")) {
-                outputLine = getHello();
+            if(path.startsWith("/movies")) {
+                String query = path.substring(path.indexOf("q=")+2, path.length());
+                outputLine = getMovies(query);
             } else {
                 outputLine = getDefaultIndex();
             }
@@ -60,11 +59,11 @@ public static void main(String[] args) throws IOException {
             serverSocket.close();
     }
 
-    public static String getHello() {
+    public static String getMovies(String query) throws MalformedURLException, IOException {
         String response = "HTTP/1.1 200 OK \r\n"
                 + "Content-Type: application/json \r\n"
                 + "\r\n" +
-                "{\"msg\": \"Hola\"}";
+                MovieController.movies(query);
         return response;
 
     }
@@ -72,55 +71,48 @@ public static void main(String[] args) throws IOException {
     public static String getDefaultIndex() {
         return "HTTP/1.1 200 OK \r\n"
                 + "Content-Type: text/html \r\n"
-                + "\r\n" +
-                "<!DOCTYPE html>\n" +
-                "<html>\n" +
-                "    <head>\n" +
-                "        <title>Form Example</title>\n" +
-                "        <meta charset=\"UTF-8\">\n" +
-                "        <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
-                "    </head>\n" +
-                "    <body>\n" +
-                "        <h1>Form with GET</h1>\n" +
-                "        <form action=\"/hello\">\n" +
-                "            <label for=\"name\">Name:</label><br>\n" +
-                "            <input type=\"text\" id=\"name\" name=\"name\" value=\"John\"><br><br>\n" +
-                "            <input type=\"button\" value=\"Submit\" onclick=\"loadGetMsg()\">\n" +
-                "        </form> \n" +
-                "        <div id=\"getrespmsg\"></div>\n" +
-                "\n" +
-                "        <script>\n" +
-                "            function loadGetMsg() {\n" +
-                "                let nameVar = document.getElementById(\"name\").value;\n" +
-                "                const xhttp = new XMLHttpRequest();\n" +
-                "                xhttp.onload = function() {\n" +
-                "                    document.getElementById(\"getrespmsg\").innerHTML =\n" +
-                "                    this.responseText;\n" +
-                "                }\n" +
-                "                xhttp.open(\"GET\", \"/hello?name=\"+nameVar);\n" +
-                "                xhttp.send();\n" +
-                "            }\n" +
-                "        </script>\n" +
-                "\n" +
-                "        <h1>Form with POST</h1>\n" +
-                "        <form action=\"/hellopost\">\n" +
-                "            <label for=\"postname\">Name:</label><br>\n" +
-                "            <input type=\"text\" id=\"postname\" name=\"name\" value=\"John\"><br><br>\n" +
-                "            <input type=\"button\" value=\"Submit\" onclick=\"loadPostMsg(postname)\">\n" +
-                "        </form>\n" +
-                "        \n" +
-                "        <div id=\"postrespmsg\"></div>\n" +
-                "        \n" +
-                "        <script>\n" +
-                "            function loadPostMsg(name){\n" +
-                "                let url = \"/hellopost?name=\" + name.value;\n" +
-                "\n" +
-                "                fetch (url, {method: 'POST'})\n" +
-                "                    .then(x => x.text())\n" +
-                "                    .then(y => document.getElementById(\"postrespmsg\").innerHTML = y);\n" +
-                "            }\n" +
-                "        </script>\n" +
-                "    </body>\n" +
-                "</html>";
+                + "\r\n"
+                + "<!DOCTYPE html>\n" + //
+                        "<html>\n" + //
+                        "    <head>\n" + //
+                        "        <title>Form Example</title>\n" + //
+                        "        <meta charset=\"UTF-8\">\n" + //
+                        "        <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" + //
+                        "    </head>\n" + //
+                        "    <body>\n" + //
+                        "        <h1>Buscador de peliculas</h1>\n" + //
+                        "        <form id=\"search\" method=\"post\">\n" + //
+                        "            <label for=\"postname\">Nombre de la pelicula:</label><br>\n" + //
+                        "            <input type=\"text\" id=\"movie\" name=\"movie\" placeholder=\"Guardians of the galaxy...\"><br><br>\n" + //
+                        "            <input type=\"submit\" value=\"Buscar\">\n" + //
+                        "        </form>\n" + //
+                        "        \n" + //
+                        "        <div id=\"result\"></div>\n" + //
+                        "        \n" + //
+                        "        <script>\n" + //
+                        "        \tconst CLIENT_URL = \"http://localhost:35000/\";\n" + //
+                        "        \n" + //
+                        "        \tlet form = document.querySelector(\"#search\");\n" + //
+                        "        \tform.addEventListener('submit', (ev) => {\n" + //
+                        "        \t\tev.preventDefault();\n" + //
+                        "        \t\tlet url = CLIENT_URL + \"movies?q=\" + form.elements.movie.value;\n" + //
+                        "\n" + //
+                        "                fetch (url, {method: 'GET'})\n" + //
+                        "                    .then(res => res.json())\n" + //
+                        "                    .then(json => {\n" + //
+                        "                    \t let html = `\n" + //
+                        "                    \t\t<br><br><b>Titulo:</b> ${json.Title}<br>\n" + //
+                        "                    \t\t<b>A\u00F1o de salida:</b> ${json.Released}<br>\n" + //
+                        "                    \t\t<b>G\u00E9nero:</b> ${json.Genre}<br>\n" + //
+                        "                    \t\t<b>Sinopsis:</b> ${json.Plot}<br>\n" + //
+                        "                    \t`;\n" + //
+                        "                    \tdocument.querySelector(\"#result\").innerHTML = html;\n" + //
+                        "                    });\n" + //
+                        "        \t});\n" + //
+                        "        \n" + //
+                        "        </script>\n" + //
+                        "    </body>\n" + //
+                        "</html>\n" + //
+                        "";
     }
 }
