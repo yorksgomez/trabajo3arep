@@ -1,4 +1,4 @@
-package org.example;
+package org.example.base;
 
 public class Environment {
     public static final String CLIENT_URL = "https://www.omdbapi.com/";

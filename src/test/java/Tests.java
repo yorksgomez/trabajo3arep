@@ -1,7 +1,7 @@
 
 import static org.junit.Assert.assertEquals;
 
-import org.example.MovieController;
+import org.example.controller.MovieController;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;

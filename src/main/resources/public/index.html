@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Form Example</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        <h1>Buscador de peliculas</h1>
+        <form id="search" method="post">
+            <label for="postname">Nombre de la pelicula:</label><br>
+            <input type="text" id="movie" name="movie" placeholder="Guardians of the galaxy..."><br><br>
+            <input type="submit" value="Buscar">
+        </form>
+        
+        <div class="img-parent">
+            <img src="logo.svg">
+        </div>
+
+        <div id="result"></div>
+        
+        <script src="app.js"></script>
+    </body>
+</html>
