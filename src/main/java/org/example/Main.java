@@ -10,7 +10,7 @@ import java.io.*;
 
 public class Main {
 
-    public static void main(String[] args) throws IOException, MalformedURLException, URISyntaxException {
+    public static void main(String[] args) throws IOException, MalformedURLException, URISyntaxException, Exception {
         ServerSocket serverSocket = null;
         try {
             serverSocket = new ServerSocket(35000);
