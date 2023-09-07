@@ -3,6 +3,7 @@ package org.example;
 import java.net.*;
 
 import org.example.base.FileStreaming;
+import org.example.base.Routing;
 import org.example.controller.MovieController;
 
 import java.io.*;
@@ -37,12 +38,14 @@ public class Main {
             byte[] outputLine;
             boolean firstLine = true;
             String path = null;
+            boolean isPost = false;
 
             while ((inputLine = in.readLine()) != null) {
                 System.out.println("Received: " + inputLine);
                 if(firstLine) {
                     firstLine = false;
                     path = inputLine.split(" ")[1];
+                    isPost = inputLine.split(" ")[0] == "POST";
                 }
                 if (!in.ready()) {
                     break;
@@ -50,8 +53,7 @@ public class Main {
             }
             
             if(path.startsWith("/api")) {
-                String query = path.substring(path.indexOf("q=")+2, path.length());
-                outputLine = getApi(query);
+                outputLine = getApi(isPost, path);
             } else {
 
                 if(FileStreaming.exists(path))
@@ -69,11 +71,16 @@ public class Main {
             serverSocket.close();
     }
 
-    public static byte[] getApi(String query) throws MalformedURLException, IOException {
+    public static byte[] getApi(boolean isPost, String path) throws MalformedURLException, IOException, Exception {
         String response = "HTTP/1.1 200 OK \r\n"
                 + "Content-Type: application/json \r\n"
-                + "\r\n" +
-                MovieController.movies(query);
+                + "\r\n";
+        
+        if(isPost)
+            response += Routing.requestPost(path);
+        else
+            response += Routing.requestGet(path);
+
         return response.getBytes();
 
     }

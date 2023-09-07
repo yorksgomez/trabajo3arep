@@ -23,13 +23,12 @@ public class FileStreaming {
         FileInputStream reader = new FileInputStream(file);
         byte[] content = new byte[(int) file.length()];
         String[] split = file.getName().split("\\.");
-        System.out.println(Arrays.toString(split));
         String extension = split[split.length - 1];
 
         reader.read(content);
 
         byte[] header = ("HTTP/1.1 200 OK \r\nContent-Type: " + mimes.getOrDefault(extension, "text/plain") + " \r\nContent-Length: " + content.length + "\r\n\r\n").getBytes();
-
+        
         byte[] result = Arrays.copyOf(header, header.length + content.length);
         System.arraycopy(content, 0, result, header.length, content.length);
         return result;
